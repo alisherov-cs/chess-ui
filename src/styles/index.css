@@ -1,0 +1,379 @@
+@import "tailwindcss";
+
+@theme {
+    /* Chess.com Primary Colors */
+    --color-primary: #81b64c;
+    --color-primary-dark: #739e43;
+    --color-primary-darker: #658c3a;
+
+    /* Background Colors - Light Mode */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f0f0f0;
+    --color-bg-tertiary: #e8e8e8;
+    --color-bg-button-secondary: #3d3c37;
+
+    /* Board Colors */
+    --color-board-light: #ebecd0;
+    --color-board-dark: #739552;
+
+    --color-icon-bullet: #e3aa24;
+    --color-icon-blitz: #fad541;
+    --color-icon-daily: #f7c631;
+
+    /* Text Colors - Light Mode */
+    --color-text-primary: #333333;
+    --color-text-secondary: #666666;
+    --color-text-muted: #8c8c8c;
+
+    /* Accent Colors */
+    --color-orange: #f0a000;
+    --color-blue: #4a8bc2;
+    --color-red: #cc3333;
+    --color-success: #5d9948;
+
+    /* UI Elements - Light Mode */
+    --color-border: #cccccc;
+    --color-hover: #f5f5f5;
+
+    --color-active-light: #f5f682;
+    --color-active-dark: #b9ca43;
+    --color-danger-light: #eb7d6a;
+    --color-danger-dark: #d36c50;
+    --color-dot: #cacbb3;
+}
+
+[theme="dark"] {
+    /* Chess.com Primary Colors */
+    --color-primary: #81b64c;
+    --color-primary-dark: #739e43;
+    --color-primary-darker: #658c3a;
+
+    /* Background Colors */
+    --color-bg-primary: #262421;
+    --color-bg-secondary: #312e2b;
+    --color-bg-tertiary: #3d3c37;
+    --color-bg-button-secondary: #3d3c37;
+
+    /* Board Colors */
+    --color-board-light: #ebecd0;
+    --color-board-dark: #739552;
+
+    /* Text Colors */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b3b3b3;
+    --color-text-muted: #7c7c7c;
+
+    /* Accent Colors */
+    --color-orange: #f0a000;
+    --color-blue: #4a8bc2;
+    --color-red: #cc3333;
+    --color-success: #5d9948;
+
+    /* UI Elements */
+    --color-border: #404040;
+    --color-hover: #3d3c37;
+}
+
+[theme="device"] {
+    @media (prefers-color-scheme: dark) {
+        /* Chess.com Primary Colors */
+        --color-primary: #81b64c;
+        --color-primary-dark: #739e43;
+        --color-primary-darker: #658c3a;
+
+        /* Background Colors */
+        --color-bg-primary: #262421;
+        --color-bg-secondary: #312e2b;
+        --color-bg-tertiary: #3d3c37;
+        --color-bg-button-secondary: #3d3c37;
+
+        /* Board Colors */
+        --color-board-light: #ebecd0;
+        --color-board-dark: #739552;
+
+        /* Text Colors */
+        --color-text-primary: #ffffff;
+        --color-text-secondary: #b3b3b3;
+        --color-text-muted: #7c7c7c;
+
+        /* Accent Colors */
+        --color-orange: #f0a000;
+        --color-blue: #4a8bc2;
+        --color-red: #cc3333;
+        --color-success: #5d9948;
+
+        /* UI Elements */
+        --color-border: #404040;
+        --color-hover: #3d3c37;
+    }
+}
+
+html,
+body,
+#root {
+    @apply w-full h-full;
+}
+
+#root {
+    @apply bg-bg-secondary text-text-primary;
+}
+
+input {
+    @apply outline-none;
+}
+
+.st1 {
+    fill: #81b64c;
+}
+.st3 {
+    fill: var(--color-text-primary);
+}
+.st2 {
+    fill: #bcbbb7;
+}
+
+.toaster .toast {
+    background-color: var(--color-bg-secondary) !important;
+    color: var(--color-text-primary) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 16px !important;
+    font-family: inherit !important;
+}
+
+/* Toast description */
+.toast [data-description] {
+    color: var(--color-text-secondary) !important;
+    margin-top: 4px !important;
+}
+
+/* Toast title */
+.toast [data-title] {
+    color: var(--color-text-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* Success toast */
+.toast[data-type="success"] {
+    border-left: 4px solid var(--color-success) !important;
+}
+
+.toast[data-type="success"] [data-icon] {
+    color: var(--color-success) !important;
+}
+
+/* Error toast */
+.toast[data-type="error"] {
+    border-left: 4px solid var(--color-red) !important;
+}
+
+.toast[data-type="error"] [data-icon] {
+    color: var(--color-red) !important;
+}
+
+/* Warning toast */
+.toast[data-type="warning"] {
+    border-left: 4px solid var(--color-orange) !important;
+}
+
+.toast[data-type="warning"] [data-icon] {
+    color: var(--color-orange) !important;
+}
+
+/* Info toast */
+.toast[data-type="info"] {
+    border-left: 4px solid var(--color-blue) !important;
+}
+
+.toast[data-type="info"] [data-icon] {
+    color: var(--color-blue) !important;
+}
+
+/* Loading toast */
+.toast[data-type="loading"] [data-icon] {
+    color: var(--color-primary) !important;
+}
+
+/* Close button */
+.toast [data-close-button] {
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-muted) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 4px !important;
+    width: 20px !important;
+    height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    opacity: 0.8 !important;
+}
+
+.toast [data-close-button]:hover {
+    background-color: var(--color-hover) !important;
+    opacity: 1 !important;
+}
+
+/* Action button */
+.toast [data-button] {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.toast [data-button]:hover {
+    background-color: var(--color-primary-dark) !important;
+    transform: translateY(-1px);
+}
+
+.toast [data-button]:active {
+    transform: translateY(0);
+}
+
+/* Cancel button */
+.toast [data-cancel-button] {
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-primary) !important;
+    border: 1px solid var(--color-border) !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.toast [data-cancel-button]:hover {
+    background-color: var(--color-hover) !important;
+}
+
+/* Toast icons */
+.toast [data-icon] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+/* Toast content wrapper */
+.toast [data-content] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+/* Buttons container */
+.toast [data-buttons] {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+}
+
+/* Animation for toast entrance */
+@keyframes toast-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation for toast exit */
+@keyframes toast-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.toast[data-mounted="true"] {
+    animation: toast-in 0.3s ease-out;
+}
+
+.toast[data-removed="true"] {
+    animation: toast-out 0.2s ease-in;
+}
+
+/* Progress bar (if using duration) */
+.toast [data-progress] {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background-color: var(--color-primary) !important;
+    opacity: 0.5 !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.toast [data-type="loading"] [data-icon] svg {
+    animation: spin 1s linear infinite;
+}
+
+/* Hover effect on entire toast */
+.toast:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .toast {
+        max-width: calc(100vw - 32px) !important;
+        margin: 0 16px !important;
+    }
+}
+
+/* Dark mode adjustments (if needed) */
+[theme="dark"] .toast {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+[theme="dark"] .toast:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+@keyframes king-in-check-flash {
+    0%,
+    100% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+    50% {
+        background-color: red;
+    }
+}
+
+@keyframes check-square-pulse {
+    0%,
+    100% {
+        box-shadow: inset 0 0 0 3px rgba(204, 51, 51, 0.6);
+    }
+    50% {
+        box-shadow: inset 0 0 0 3px rgba(204, 51, 51, 1);
+    }
+}
+
+.animate-illegal {
+    animation: king-in-check-flash 0.3s ease infinite;
+}
