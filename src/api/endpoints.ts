@@ -9,6 +9,7 @@ export const endpoints = {
     },
     friends: {
         all: "/friends",
+        byId: (id: string) => `/friends/${id}`,
         suggestions: "/friends/suggestions",
         sendFriendRequest: "/friends/sendFriendRequest",
         incomingRequests: "/friends/incomingRequests",

@@ -1,6 +1,7 @@
+import { Loading } from "@/components";
 import { AuthGuard } from "@/features/auth/guard";
 import { Layout } from "@/features/layout";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 const HomePage = lazy(() => import("@/features/home/page"));
@@ -16,45 +17,114 @@ const AuthSetupPasswordPage = lazy(
 );
 const PlayPage = lazy(() => import("@/features/play/page"));
 const FriendsPage = lazy(() => import("@/features/friends/page"));
-const GamePage = lazy(() => import("@/features/test/page"));
-const GameV2Page = lazy(() => import("@/features/game/page"));
+const GamePage = lazy(() => import("@/features/game/page"));
 
 export const router = createBrowserRouter([
     {
-        element: <Layout />,
+        element: (
+            <Suspense>
+                <Layout />
+            </Suspense>
+        ),
         children: [
-            { path: "/", element: <WelcomePage /> },
             {
-                element: <AuthGuard />,
+                path: "/",
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <WelcomePage />
+                    </Suspense>
+                ),
+            },
+            {
+                element: (
+                    <Suspense>
+                        <AuthGuard />
+                    </Suspense>
+                ),
                 children: [
-                    { index: true, path: "/home", element: <HomePage /> },
-                    { path: "/user/:id", element: <ProfilePage /> },
-                    { path: "/play", element: <PlayPage /> },
-                    { path: "/friends", element: <FriendsPage /> },
-                    { path: "/game", element: <GamePage /> },
-                    { path: "/gamev2", element: <GameV2Page /> },
+                    {
+                        index: true,
+                        path: "/home",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <HomePage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "/user/:id",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <ProfilePage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "/play",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <PlayPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "/friends",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <FriendsPage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "/game",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <GamePage />
+                            </Suspense>
+                        ),
+                    },
                 ],
             },
         ],
     },
     {
         path: "/auth/signup",
-        element: <SignupPage />,
+        element: (
+            <Suspense fallback={<Loading />}>
+                <SignupPage />
+            </Suspense>
+        ),
     },
     {
         path: "/auth/login",
-        element: <LoginPage />,
+        element: (
+            <Suspense fallback={<Loading />}>
+                <LoginPage />
+            </Suspense>
+        ),
     },
     {
-        element: <AuthGuard />,
+        element: (
+            <Suspense fallback={<Loading />}>
+                <AuthGuard />
+            </Suspense>
+        ),
         children: [
             {
                 path: "/auth/setup/username",
-                element: <AuthSetupUsernamePage />,
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <AuthSetupUsernamePage />
+                    </Suspense>
+                ),
             },
             {
                 path: "/auth/setup/password",
-                element: <AuthSetupPasswordPage />,
+                element: (
+                    <Suspense fallback={<Loading />}>
+                        <AuthSetupPasswordPage />
+                    </Suspense>
+                ),
             },
         ],
     },

@@ -1,107 +1,123 @@
-import { Button, Checkbox, Icons } from "@/components";
+import { Button, Icons } from "@/components";
 import { DemoBoard } from "./components/demoBoard";
-import { ChevronDownIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import clsx from "clsx";
-import { durations } from "@/constants";
+import { Settings } from "./components/settings";
+import { useFindFriends } from "../friends/api/findFriends.request";
+import { useEffect, useMemo, useState } from "react";
+import { clsx } from "clsx";
+import { PlayFriendCard } from "./components/userCard";
+import { useSearchParams } from "react-router-dom";
+import { ArrowLeftIcon } from "lucide-react";
+import { PlayWithFriend } from "./components/playWithFriend";
 
 export default function PlayPage() {
-    const [open, setOpen] = useState(false);
-    const [rated, setRated] = useState(true);
-    const [activeDuration, setActiveDuration] = useState("rapid-15.10");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const friendId = useMemo(() => searchParams.get("friend"), [searchParams]);
+    const { data: friendsData } = useFindFriends();
+    const [activeTab, setActiveTab] = useState("online");
 
-    const activeDurationData = useMemo(() => {
-        return durations.find((duration) =>
-            duration.children.some((child) => child.id === activeDuration)
-        );
-    }, [activeDuration]);
+    const friends = useMemo(
+        () => friendsData?.pages.flatMap((page) => page.data),
+        [friendsData]
+    );
 
-    const activeTimeData = useMemo(() => {
-        return activeDurationData?.children.find(
-            (child) => child.id === activeDuration
-        );
-    }, [activeDurationData, activeDuration]);
+    useEffect(() => {
+        if (friendId) {
+            setActiveTab("friends");
+        }
+    }, [friendId]);
+
+    const tabs = [
+        {
+            id: "online",
+            Icon: Icons.plus,
+            title: "New Game",
+            content: (
+                <div className="flex flex-col gap-2">
+                    <Settings />
+                    <div className="flex flex-col gap-2">
+                        <Button className="py-3 text-lg font-bold">
+                            Start Game
+                        </Button>
+                        <Button
+                            className="py-3 text-lg font-bold flex gap-3"
+                            variant="secondary"
+                        >
+                            <Icons.handshake width={24} height={24} />
+                            <span>Play a Friend</span>
+                        </Button>
+                    </div>
+                </div>
+            ),
+        },
+        {
+            id: "friends",
+            Icon: Icons.people,
+            title: "Friends",
+            content: (
+                <div>
+                    {friends?.map((friend) => (
+                        <PlayFriendCard key={friend.id} friend={friend} />
+                    ))}
+                </div>
+            ),
+        },
+    ];
 
     return (
         <div className="h-full flex gap-4 py-2">
             <DemoBoard />
-            <div className="w-100 bg-bg-secondary rounded-md px-5 py-10 flex flex-col gap-6">
-                <div className="w-full flex flex-col gap-3">
-                    <Button
-                        onClick={() => setOpen((prev) => !prev)}
-                        className="py-3 text-lg font-bold flex gap-3 relative"
-                        variant="secondary"
-                    >
-                        {activeDurationData?.icon}
-                        <span>
-                            {activeTimeData?.title} (
-                            {rated ? activeDurationData?.title : "Unrated"})
-                        </span>
-                        <ChevronDownIcon
-                            className={clsx(
-                                "absolute right-3",
-                                open ? "rotate-180" : "rotate-0"
-                            )}
-                            color="grey"
-                        />
-                    </Button>
-                    <div className={clsx("pb-4", open ? "visible" : "hidden")}>
-                        <div className="flex items-center justify-between py-4">
-                            <h4>Rated</h4>
-                            <Checkbox
-                                checked={rated}
-                                onCheck={(rated) => setRated(rated)}
-                            />
+            <div className="w-100 bg-bg-secondary rounded-md overflow-y-scroll no-scrollbar">
+                <div className="grid grid-cols-2 py-4 border-b border-border">
+                    {tabs.map((tab) => (
+                        <div
+                            key={tab.id}
+                            onClick={() => {
+                                searchParams.delete("friend");
+                                setSearchParams(searchParams);
+                                setActiveTab(tab.id);
+                            }}
+                            className="flex items-center justify-center cursor-pointer"
+                        >
+                            <div
+                                className={clsx(
+                                    "flex flex-col gap-2 items-center justify-center",
+                                    activeTab === tab.id
+                                        ? "text-text-primary"
+                                        : "text-text-secondary"
+                                )}
+                            >
+                                {
+                                    <tab.Icon
+                                        className={clsx(
+                                            activeTab === tab.id
+                                                ? "fill-text-primary"
+                                                : "fill-text-muted"
+                                        )}
+                                    />
+                                }
+                                <h2 className="text-inherit">{tab.title}</h2>
+                            </div>
                         </div>
-                        <div className="flex flex-col gap-4">
-                            {durations.map((duration) => (
-                                <div
-                                    key={duration.id}
-                                    className="flex flex-col gap-1"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <span>{duration.icon}</span>
-                                        <span>{duration.title}</span>
-                                    </div>
-                                    <div className="grid grid-cols-3">
-                                        {duration.children.map((child) => (
-                                            <div
-                                                className={clsx(
-                                                    "border-2 rounded-lg p-0.5",
-                                                    activeDuration === child.id
-                                                        ? "border-success"
-                                                        : "border-transparent"
-                                                )}
-                                            >
-                                                <Button
-                                                    onClick={() =>
-                                                        setActiveDuration(
-                                                            child.id
-                                                        )
-                                                    }
-                                                    variant="secondary"
-                                                    className="w-full"
-                                                >
-                                                    {child.title}
-                                                </Button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <Button className="py-3 text-lg font-bold">
-                        Start Game
-                    </Button>
+                    ))}
                 </div>
-                <Button
-                    className="py-3 text-lg font-bold flex gap-3"
-                    variant="secondary"
-                >
-                    <Icons.handshake width={24} height={24} />
-                    <span>Play a Friend</span>
-                </Button>
+                <div className="px-5 py-10 flex flex-col gap-6">
+                    {!friendId ? (
+                        tabs.find((item) => item.id === activeTab)?.content
+                    ) : (
+                        <div className="relative">
+                            <button
+                                onClick={() => {
+                                    searchParams.delete("friend");
+                                    setSearchParams(searchParams);
+                                }}
+                                className="absolute top-0 left-0 cursor-pointer transition-all duration-150 hover:bg-bg-tertiary w-10 h-10 flex items-center justify-center rounded-md"
+                            >
+                                <ArrowLeftIcon />
+                            </button>
+                            <PlayWithFriend />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

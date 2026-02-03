@@ -377,3 +377,11 @@ input {
 .animate-illegal {
     animation: king-in-check-flash 0.3s ease infinite;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+}
+
+.play-as-white::before {
+    content: "\e904";
+}
