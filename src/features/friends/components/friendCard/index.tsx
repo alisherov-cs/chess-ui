@@ -1,13 +1,14 @@
 import { Button, Icons } from "@/components";
 import { type TUser } from "../../api/findSuggestions.request";
 import { useGetCountryData } from "@/features/auth/profile/api/country.request";
+import { Link } from "react-router-dom";
 
 type TFriendCard = {
     friend: TUser;
 };
 
 export const FriendCard = ({ friend }: TFriendCard) => {
-    const { username, email, avatar, country: countryCode } = friend;
+    const { id, username, email, avatar, country: countryCode } = friend;
     const { data: country } = useGetCountryData(countryCode);
 
     return (
@@ -33,10 +34,12 @@ export const FriendCard = ({ friend }: TFriendCard) => {
                 </div>
             </div>
             <div className="flex items-center gap-3">
-                <Button className="flex items-center gap-2">
-                    <Icons.chellange className="fill-text-primary cursor-pointer" />
-                    <span>Chellange</span>
-                </Button>
+                <Link to={`/play?friend=${id}`}>
+                    <Button className="flex items-center gap-2">
+                        <Icons.chellange className="fill-text-primary cursor-pointer" />
+                        <span>Chellange</span>
+                    </Button>
+                </Link>
                 <Icons.menu className="fill-text-primary cursor-pointer" />
             </div>
         </div>

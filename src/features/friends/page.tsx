@@ -7,7 +7,7 @@ import { useFindFriends } from "./api/findFriends.request";
 import { debounce } from "@/utils/debounce";
 import { useSearchParams } from "react-router-dom";
 import { useFindSuggestions } from "./api/findSuggestions.request";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { SuggestionCard } from "./components/suggestionCard";
 import { AppEvents, eventEmitter } from "@/services/eventEmitter";
 import { FriendCard } from "./components/friendCard";
@@ -87,27 +87,31 @@ export default function FriendsPage() {
                         placeholder="Search by name or username"
                     />
                     {(isLoading || isSuggestionLoading) && <Loading />}
-                    {(!isLoading || !isSuggestionLoading) && (
+                    {!isLoading && !isSuggestionLoading && (
                         <>
                             <div className="py-5 flex flex-col gap-10">
                                 <div>
-                                    <div
-                                        className={clsx(
-                                            "flex items-center gap-2 mb-4"
-                                        )}
-                                    >
-                                        <h2 className="font-semibold">
-                                            Friends
-                                        </h2>
-                                        <span className="py-0.5 px-1.5 rounded-sm bg-bg-secondary text-text-secondary text-sm">
-                                            {pagination?.total}
-                                        </span>
-                                    </div>
-                                    {!friends?.length && (
-                                        <h2 className="text-text-secondary">
-                                            No results found.
-                                        </h2>
+                                    {(!!friends?.length ||
+                                        searchParams.get("search")) && (
+                                        <div
+                                            className={clsx(
+                                                "flex items-center gap-2 mb-4"
+                                            )}
+                                        >
+                                            <h2 className="font-semibold">
+                                                Friends
+                                            </h2>
+                                            <span className="py-0.5 px-1.5 rounded-sm bg-bg-secondary text-text-secondary text-sm">
+                                                {pagination?.total}
+                                            </span>
+                                        </div>
                                     )}
+                                    {!friends?.length &&
+                                        searchParams.get("search") && (
+                                            <h2 className="text-text-secondary">
+                                                No results found.
+                                            </h2>
+                                        )}
                                     <div>
                                         {friends?.map((friend) => (
                                             <FriendCard friend={friend} />

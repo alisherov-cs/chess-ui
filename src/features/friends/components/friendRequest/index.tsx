@@ -5,9 +5,13 @@ import { useOutgoingRequests } from "../../api/outgoingRequests.request";
 import { OutgoingCard } from "../outgoingCard";
 import { AppEvents, eventEmitter } from "@/services/eventEmitter";
 import { IncomingCard } from "../incomingCard";
+import { Loading } from "@/components";
+import { socket } from "@/socket";
+import { useReadAllIncomingRequests } from "../../api/readAllIncomingRequests.request";
 
 export const FriendRequests = () => {
     const [activeTab, setActiveTab] = useState("incoming");
+    const { mutateAsync: readAll } = useReadAllIncomingRequests();
     const {
         data: incomingRequestsData,
         isLoading: incomingLoading,
@@ -18,6 +22,16 @@ export const FriendRequests = () => {
         isLoading: outgoingLoading,
         refetch: refetchOutgoing,
     } = useOutgoingRequests();
+
+    useEffect(() => {
+        socket.on("incomingFriendRequest", () => refetchIncoming());
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === "incoming") {
+            readAll().then(() => refetchIncoming());
+        }
+    }, [activeTab]);
 
     const incomingRequests = useMemo(
         () => incomingRequestsData?.pages.flatMap((page) => page.data),
@@ -100,6 +114,8 @@ export const FriendRequests = () => {
             ),
         },
     ];
+
+    if (incomingLoading || outgoingLoading) return <Loading />;
 
     return (
         <div className="flex-1 bg-bg-primary rounded-md h-fit px-5 py-3">

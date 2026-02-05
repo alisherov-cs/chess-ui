@@ -1,11 +1,43 @@
-import { Button, Icons, Logo } from "@/components";
+import { Button, Icons, Loading, Logo } from "@/components";
 import { navbarLinks } from "@/constants";
 import { useGetProfile } from "@/features/auth/profile/api/profile.request";
+import { useIncomingRequests } from "@/features/friends/api/incomingRequests.request";
+import { useFindAllInvitations } from "@/features/invites/api/findAllInvitations.request";
 import { ToggleTheme } from "@/features/theme";
+import { socket } from "@/socket";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 
 export const Sidebar = () => {
     const { data: profile, isFetched } = useGetProfile();
+    const {
+        data: invitationsData,
+        isLoading,
+        refetch,
+    } = useFindAllInvitations();
+    const {
+        data: incomingRequestsData,
+        isLoading: incomingLoading,
+        refetch: refetchIncoming,
+    } = useIncomingRequests();
+
+    const invitationPagination = useMemo(
+        () => invitationsData?.pages?.[0].pagination,
+        [invitationsData]
+    );
+    const incomingPagination = useMemo(
+        () => incomingRequestsData?.pages?.[0].pagination,
+        [incomingRequestsData]
+    );
+
+    useEffect(() => {
+        socket.on("newChellange", () => refetch());
+        socket.on("chellange.rejected", () => refetch());
+        socket.on("chellange.accepted", () => refetch());
+        socket.on("incomingFriendRequest", () => refetchIncoming());
+    }, []);
+
+    if (isLoading || incomingLoading) return <Loading />;
 
     return (
         <div className="h-screen sticky top-0 left-0 py-5 px-3 bg-bg-secondary w-50 flex flex-col justify-between">
@@ -16,10 +48,24 @@ export const Sidebar = () => {
                         <Link
                             to={link.href}
                             key={link.href}
-                            className="flex items-center gap-4 transition-all duration-150 hover:bg-bg-tertiary w-full px-4 py-2 rounded-md"
+                            className="flex items-center gap-4 transition-all duration-150 hover:bg-bg-tertiary w-full px-4 py-2 rounded-md relative"
                         >
                             {link.icon}
-                            <span className="font-semibold">{link.title}</span>
+                            <span className="font-semibold relative">
+                                {link.title}
+                                {link.title === "Invites" &&
+                                    (invitationPagination?.unRead ?? 0) > 0 && (
+                                        <span className="bg-red w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold absolute top-0 right-0 translate-x-full -translate-y-1/2">
+                                            {invitationPagination?.unRead}
+                                        </span>
+                                    )}
+                                {link.title === "Friends" &&
+                                    (incomingPagination?.unRead ?? 0) > 0 && (
+                                        <span className="bg-red w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold absolute top-0 right-0 translate-x-full -translate-y-1/2">
+                                            {incomingPagination?.unRead}
+                                        </span>
+                                    )}
+                            </span>
                         </Link>
                     ))}
                 </div>

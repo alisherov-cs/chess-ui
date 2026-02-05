@@ -2,7 +2,10 @@ import { Draggable, Icons, Loading } from "@/components";
 import { Droppable } from "@/components/droppable";
 import { defaultBoard, pieceImageKeys } from "@/constants";
 import { useGetCountryData } from "@/features/auth/profile/api/country.request";
-import { useGetProfile } from "@/features/auth/profile/api/profile.request";
+import {
+    useGetProfile,
+    type TUser,
+} from "@/features/auth/profile/api/profile.request";
 import { even, odd } from "@/utils/oddOrEven";
 import { hashPosition } from "@/utils/positionConverter";
 import {
@@ -65,9 +68,14 @@ type TCenterCursor = {
     activatorEvent: Event | null;
 };
 
-export const DemoBoard = () => {
+type TDemoBoard = {
+    oponent?: TUser;
+};
+
+export const DemoBoard = ({ oponent }: TDemoBoard) => {
     const { data: profile, isLoading } = useGetProfile();
     const { data: country } = useGetCountryData(profile?.country);
+    const { data: oponentCountry } = useGetCountryData(oponent?.country);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [dangerZones, setDangerZones] = useState<string[]>([]);
@@ -132,12 +140,30 @@ export const DemoBoard = () => {
             <div className="flex items-center justify-between">
                 <div className="flex gap-2 items-start">
                     <div className="w-10 h-10 rounded-sm overflow-hidden shrink-0">
-                        <img src="/oponent-black.png" />
+                        {oponent?.avatar ? (
+                            <img src={oponent.avatar} />
+                        ) : (
+                            <img src="/oponent-black.png" />
+                        )}
                     </div>
                     <div className="flex items-center gap-1">
                         <h3 className="text-text-primary font-semibold">
-                            Opponent
+                            {oponent?.username ?? "Opponent"}
                         </h3>
+                        {oponent?.elo && (
+                            <span className="text-sm text-text-secondary">
+                                ({oponent.elo})
+                            </span>
+                        )}
+                        {oponentCountry?.[0] && (
+                            <div>
+                                <img
+                                    src={oponentCountry[0].flags.svg}
+                                    alt={oponentCountry[0].flags.alt}
+                                    className="h-3.5 w-5 rounded-xs cursor-pointer"
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 

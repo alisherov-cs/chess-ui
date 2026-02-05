@@ -5,13 +5,15 @@ import { useFindFriends } from "../friends/api/findFriends.request";
 import { useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { PlayFriendCard } from "./components/userCard";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 import { PlayWithFriend } from "./components/playWithFriend";
+import { useFindFriendById } from "../friends/api/findFriendById";
 
 export default function PlayPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const friendId = useMemo(() => searchParams.get("friend"), [searchParams]);
+    const { data: friend } = useFindFriendById(friendId);
     const { data: friendsData } = useFindFriends();
     const [activeTab, setActiveTab] = useState("online");
 
@@ -39,6 +41,7 @@ export default function PlayPage() {
                             Start Game
                         </Button>
                         <Button
+                            onClick={() => setActiveTab("friends")}
                             className="py-3 text-lg font-bold flex gap-3"
                             variant="secondary"
                         >
@@ -58,6 +61,14 @@ export default function PlayPage() {
                     {friends?.map((friend) => (
                         <PlayFriendCard key={friend.id} friend={friend} />
                     ))}
+                    {!friends?.length && (
+                        <div className="flex flex-col gap-3 items-center justify-center">
+                            <h3>You don't have friends</h3>
+                            <Link to="/friends">
+                                <Button>Add friends to play</Button>
+                            </Link>
+                        </div>
+                    )}
                 </div>
             ),
         },
@@ -65,7 +76,7 @@ export default function PlayPage() {
 
     return (
         <div className="h-full flex gap-4 py-2">
-            <DemoBoard />
+            <DemoBoard oponent={friend} />
             <div className="w-100 bg-bg-secondary rounded-md overflow-y-scroll no-scrollbar">
                 <div className="grid grid-cols-2 py-4 border-b border-border">
                     {tabs.map((tab) => (

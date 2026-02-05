@@ -74,9 +74,7 @@ type TIndex = {
 };
 
 export const Numbers = ({ position }: TIndex) => {
-    const [col, row] = position.split("");
-
-    if (col !== "a") return;
+    const [_, row] = position.split("");
 
     return (
         <span
@@ -91,9 +89,7 @@ export const Numbers = ({ position }: TIndex) => {
 };
 
 export const Letters = ({ position }: TIndex) => {
-    const [col, row] = position.split("");
-
-    if (+row !== 1) return;
+    const [col] = position.split("");
 
     return (
         <span

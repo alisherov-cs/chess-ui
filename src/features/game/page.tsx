@@ -15,13 +15,16 @@ import {
     getBgColor,
     getDangerZoneColor,
     getIllegalBgColor,
-    letters,
 } from "./colors";
 import { Captures, Letters, Moves, Numbers, Piece } from "./utils";
 import { Promotion } from "./promotion";
 import { Color, pieceImageKeys, type Role } from "@/constants";
 import { UserIndicator } from "./userIndicator";
 import { GameStatusModal } from "./gameStatusModal";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useFindGame } from "./api/findGame.request";
+import { RotateCwSquare } from "lucide-react";
+import { socket } from "@/socket";
 
 type TGameStatus = {
     winner: Color | null;
@@ -92,12 +95,19 @@ type TCenterCursor = {
     activatorEvent: Event | null;
 };
 
-export default function TestDemoGameV2() {
+export default function Game() {
+    const { id } = useParams();
     const { data: profile, isLoading } = useGetProfile();
+    const {
+        data: game,
+        isLoading: gameLoading,
+        isFetched,
+        refetch,
+    } = useFindGame(id);
     const [activeId, setActiveId] = useState<string | null>(null);
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [dangerZones, setDangerZones] = useState<string[]>([]);
-    const [history, setHistory] = useState<string[]>([]);
+    const [history, setHistory] = useState<string[]>(game?.history ?? []);
     const moveSound = useRef<HTMLAudioElement>(null);
     const captureSound = useRef<HTMLAudioElement>(null);
     const castleSound = useRef<HTMLAudioElement>(null);
@@ -105,11 +115,53 @@ export default function TestDemoGameV2() {
     const illegalSound = useRef<HTMLAudioElement>(null);
     const [isCheck, setIsCheck] = useState(false);
     const [illegalMove, setIllegalMove] = useState(false);
-    const [currentPosition, setCurrentPosition] = useState(defaultPositions);
+    const [currentPosition, setCurrentPosition] = useState(
+        game?.currentPosition ?? defaultPositions
+    );
     const [promotion, setPromotion] = useState<string | null>(null);
     const [winner, setWinner] = useState<Color | null>(null);
     const [draw, setDraw] = useState<boolean>(false);
-    const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+    const [numbers, setNumbers] = useState([1, 2, 3, 4, 5, 6, 7, 8].reverse());
+    const [letters, setLetters] = useState([
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+    ]);
+    const [rotate, setRotate] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        socket.on("chellange.rejected", (gameId: string) => {
+            if (gameId === id) {
+                navigate("/");
+            }
+        });
+        socket.on("chellange.accepted", (gameId: string) => {
+            if (gameId === id) {
+                refetch();
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        console.log({ game });
+
+        if (game?.playerBlackId === profile?.id) {
+            setNumbers((prev) => [...prev].reverse());
+            setLetters((prev) => [...prev].reverse());
+        }
+    }, [game]);
+
+    const rotateBoard = () => {
+        setNumbers((prev) => [...prev].reverse());
+        setLetters((prev) => [...prev].reverse());
+        setRotate((prev) => !prev);
+    };
 
     const moves = useMemo(() => {
         if (activeId) {
@@ -514,104 +566,160 @@ export default function TestDemoGameV2() {
         setPromotion(null);
     };
 
-    if (isLoading) return <Loading />;
+    if (isLoading || gameLoading) return <Loading />;
+    if (isFetched && !game) return <Navigate to="/" />;
 
     return (
-        <div className="h-full w-full flex-1 flex flex-col justify-between gap-3">
-            <UserIndicator color={Color.black} time="10:00" />
-            <DndContext
-                modifiers={[centerCursor]}
-                onDragStart={onDragStart}
-                onDragEnd={onDragEnd}
-            >
-                <div className="relative grid grid-cols-1 rounded-md overflow-hidden w-200 h-200 aspect-square select-none!">
-                    {numbers.reverse().map((row) => (
-                        <div key={`row-${row}`} className="grid grid-cols-8">
-                            {letters.map((col) => {
-                                const position = `${col}${row}`;
+        <div
+            className={clsx(
+                "h-full w-full flex-1 flex justify-between gap-3",
+                rotate ? "flex-col-reverse" : "flex-col"
+            )}
+        >
+            <UserIndicator
+                user={
+                    game?.playerWhiteId === profile?.id
+                        ? game?.playerBlack
+                        : game?.playerWhite
+                }
+                color={
+                    game?.playerWhiteId === profile?.id
+                        ? Color.black
+                        : Color.white
+                }
+                time="10:00"
+            />
+            <div className="flex gap-2">
+                <DndContext
+                    modifiers={[centerCursor]}
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
+                >
+                    <div className="relative grid grid-cols-1 rounded-md overflow-hidden w-200 h-200 aspect-square select-none!">
+                        {numbers.reverse().map((row) => (
+                            <div
+                                key={`row-${row}`}
+                                className="grid grid-cols-8"
+                            >
+                                {letters.map((col) => {
+                                    const position = `${col}${row}`;
 
-                                return (
-                                    <Droppable key={`col-${col}`} id={position}>
-                                        <div
-                                            onClick={() =>
-                                                onSquareClick(position)
-                                            }
-                                            onContextMenu={(e) => {
-                                                e.preventDefault();
-                                                toggleDangerZone(position);
-                                            }}
-                                            className={clsx(
-                                                "aspect-square w-full h-full relative flex items-center justify-center",
-                                                getBgColor(position),
-                                                getActiveBgColor(
-                                                    position,
-                                                    activeId,
-                                                    draggingId
-                                                ),
-                                                getDangerZoneColor(
-                                                    position,
-                                                    dangerZones
-                                                ),
-                                                getIllegalBgColor(
-                                                    illegalMove,
-                                                    position,
-                                                    history,
-                                                    currentPosition
-                                                )
-                                            )}
+                                    return (
+                                        <Droppable
+                                            key={`col-${col}`}
+                                            id={position}
                                         >
-                                            <Numbers position={position} />
-                                            <Letters position={position} />
-                                            {!promotion
-                                                ?.split("-")?.[0]
-                                                .endsWith(position) && (
-                                                <Piece
+                                            <div
+                                                onClick={() =>
+                                                    onSquareClick(position)
+                                                }
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault();
+                                                    toggleDangerZone(position);
+                                                }}
+                                                className={clsx(
+                                                    "aspect-square w-full h-full relative flex items-center justify-center",
+                                                    getBgColor(position),
+                                                    getActiveBgColor(
+                                                        position,
+                                                        activeId,
+                                                        draggingId
+                                                    ),
+                                                    getDangerZoneColor(
+                                                        position,
+                                                        dangerZones
+                                                    ),
+                                                    getIllegalBgColor(
+                                                        illegalMove,
+                                                        position,
+                                                        history,
+                                                        currentPosition
+                                                    )
+                                                )}
+                                            >
+                                                {letters[0] === col && (
+                                                    <Numbers
+                                                        position={position}
+                                                    />
+                                                )}
+                                                {numbers[numbers.length - 1] ===
+                                                    Number(row) && (
+                                                    <Letters
+                                                        position={position}
+                                                    />
+                                                )}
+                                                {!promotion
+                                                    ?.split("-")?.[0]
+                                                    .endsWith(position) && (
+                                                    <Piece
+                                                        position={position}
+                                                        currentPosition={
+                                                            currentPosition
+                                                        }
+                                                    />
+                                                )}
+                                                <Moves
                                                     position={position}
+                                                    legalMoves={
+                                                        moves.legalMoves
+                                                    }
+                                                />
+                                                <Captures
+                                                    position={position}
+                                                    legalCaptures={
+                                                        moves.legalCaptures
+                                                    }
+                                                />
+                                                {promotion?.split("-")?.[1] ===
+                                                    position && (
+                                                    <Promotion
+                                                        color={
+                                                            history.length %
+                                                                2 ===
+                                                            0
+                                                                ? "w"
+                                                                : "b"
+                                                        }
+                                                        onSelect={
+                                                            onSelectPromotion
+                                                        }
+                                                        onReject={
+                                                            onRejectPromotion
+                                                        }
+                                                    />
+                                                )}
+                                                <GameStatus
+                                                    winner={winner}
+                                                    draw={draw}
                                                     currentPosition={
                                                         currentPosition
                                                     }
+                                                    position={position}
                                                 />
-                                            )}
-                                            <Moves
-                                                position={position}
-                                                legalMoves={moves.legalMoves}
-                                            />
-                                            <Captures
-                                                position={position}
-                                                legalCaptures={
-                                                    moves.legalCaptures
-                                                }
-                                            />
-                                            {promotion?.split("-")?.[1] ===
-                                                position && (
-                                                <Promotion
-                                                    color={
-                                                        history.length % 2 === 0
-                                                            ? "w"
-                                                            : "b"
-                                                    }
-                                                    onSelect={onSelectPromotion}
-                                                    onReject={onRejectPromotion}
-                                                />
-                                            )}
-                                            <GameStatus
-                                                winner={winner}
-                                                draw={draw}
-                                                currentPosition={
-                                                    currentPosition
-                                                }
-                                                position={position}
-                                            />
-                                        </div>
-                                    </Droppable>
-                                );
-                            })}
-                        </div>
-                    ))}
-                    <GameStatusModal winner={winner} draw={draw} />
+                                            </div>
+                                        </Droppable>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                        <GameStatusModal winner={winner} draw={draw} />
+                    </div>
+                </DndContext>
+                <div>
+                    <button onClick={rotateBoard} className="cursor-pointer">
+                        <RotateCwSquare />
+                    </button>
                 </div>
-            </DndContext>
-            <UserIndicator color={Color.white} user={profile} time="10:00" />
+            </div>
+            <UserIndicator
+                color={
+                    game?.playerWhiteId === profile?.id
+                        ? Color.white
+                        : Color.black
+                }
+                user={profile}
+                time="10:00"
+            />
 
             <div className="hidden">
                 <audio ref={moveSound} src="/sounds/move-self.mp3" />

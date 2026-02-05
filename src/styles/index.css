@@ -381,7 +381,3 @@ input {
 .no-scrollbar::-webkit-scrollbar {
     display: none !important;
 }
-
-.play-as-white::before {
-    content: "\e904";
-}

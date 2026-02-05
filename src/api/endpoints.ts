@@ -16,5 +16,16 @@ export const endpoints = {
         outgoingRequests: "/friends/outgoingRequests",
         cancelFriendRequest: "/friends/cancelFriendRequest",
         acceptFriendRequest: "/friends/acceptFriendRequest",
+        readAll: "/friends/readAll",
+    },
+    invitations: {
+        all: "/invitation",
+        sendChellange: "/invitation/chellangeFriend",
+        readAll: "/invitation/readAll",
+        reject: "/invitation/rejectChellange",
+        accept: "/invitation/acceptChellange",
+    },
+    game: {
+        byId: (id: string) => `/game/${id}`,
     },
 };

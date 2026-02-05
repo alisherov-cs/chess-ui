@@ -5,6 +5,7 @@ export type TPagination = {
     total: number;
     limit: number;
     totalPages: number;
+    unRead?: number;
 };
 
 export type TApiResponseWithPagination<T> = {

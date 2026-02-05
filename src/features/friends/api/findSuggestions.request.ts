@@ -40,8 +40,6 @@ export const useFindSuggestions = () => {
             return (
                 await axiosPrivate.get(endpoints.friends.suggestions, {
                     params: {
-                        page,
-                        limit,
                         search,
                     },
                 })

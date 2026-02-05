@@ -1,10 +1,20 @@
 import { Button, Checkbox } from "@/components";
 import { ChevronDownIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import clsx from "clsx";
+import { useEffect, useMemo, useState } from "react";
+import { clsx } from "clsx";
 import { durations } from "@/constants";
 
-export const Settings = () => {
+export type TValues = {
+    rated: boolean;
+    duration: number;
+    timeId: string;
+};
+
+type TSettings = {
+    onChange?: (values: TValues) => void;
+};
+
+export const Settings = ({ onChange }: TSettings) => {
     const [open, setOpen] = useState(false);
     const [rated, setRated] = useState(true);
     const [activeDuration, setActiveDuration] = useState("rapid-15.10");
@@ -20,6 +30,14 @@ export const Settings = () => {
             (child) => child.id === activeDuration
         );
     }, [activeDurationData, activeDuration]);
+
+    useEffect(() => {
+        onChange?.({
+            rated,
+            duration: activeTimeData?.value!,
+            timeId: activeDuration,
+        });
+    }, [rated, activeTimeData, activeDuration]);
 
     return (
         <div className="w-full flex flex-col gap-3">

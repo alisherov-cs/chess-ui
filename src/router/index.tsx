@@ -18,6 +18,7 @@ const AuthSetupPasswordPage = lazy(
 const PlayPage = lazy(() => import("@/features/play/page"));
 const FriendsPage = lazy(() => import("@/features/friends/page"));
 const GamePage = lazy(() => import("@/features/game/page"));
+const InvitesPage = lazy(() => import("@/features/invites/page"));
 
 export const router = createBrowserRouter([
     {
@@ -76,10 +77,18 @@ export const router = createBrowserRouter([
                         ),
                     },
                     {
-                        path: "/game",
+                        path: "/game/:id",
                         element: (
                             <Suspense fallback={<Loading />}>
                                 <GamePage />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "/invites",
+                        element: (
+                            <Suspense fallback={<Loading />}>
+                                <InvitesPage />
                             </Suspense>
                         ),
                     },
