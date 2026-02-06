@@ -136,6 +136,7 @@ export default function Game() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        socket.emit("joinGameRoom", id);
         socket.on("chellange.rejected", (gameId: string) => {
             if (gameId === id) {
                 navigate("/");
@@ -146,14 +147,21 @@ export default function Game() {
                 refetch();
             }
         });
+        socket.on("newMove", (currentPosition: string[], history: string[]) => {
+            setCurrentPosition(currentPosition);
+            setHistory(history);
+        });
     }, []);
 
     useEffect(() => {
-        console.log({ game });
-
         if (game?.playerBlackId === profile?.id) {
             setNumbers((prev) => [...prev].reverse());
             setLetters((prev) => [...prev].reverse());
+        }
+
+        if (game) {
+            setCurrentPosition(game.currentPosition);
+            setHistory(game.history);
         }
     }, [game]);
 
@@ -267,7 +275,7 @@ export default function Game() {
                 }
             }
         }
-    }, [currentPosition]);
+    }, [currentPosition, history]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -434,6 +442,13 @@ export default function Game() {
         if (!moves.legalPromotions.includes(overKey)) {
             setHistory((prev) => [...prev, newMove]);
             setCurrentPosition(newPosition);
+
+            socket.emit("playerMoved", {
+                currentPosition: newPosition,
+                history: [...history, newMove],
+                gameId: id,
+                userId: profile?.id,
+            });
         }
         setActiveId(null);
         setDraggingId(null);
@@ -444,6 +459,15 @@ export default function Game() {
         const [_, __, col, row] = key.split("");
 
         if (promotion) return;
+        if (
+            game?.playerWhiteId !== profile?.id &&
+            game?.playerBlackId !== profile?.id
+        )
+            return;
+        if (game?.playerWhiteId === profile?.id && history.length % 2 === 1)
+            return;
+        if (game?.playerBlackId === profile?.id && history.length % 2 === 0)
+            return;
 
         if (activeId && moves.legalCaptures.includes(`${col}${row}`)) {
             move(activeId, `${col}${row}`);
@@ -559,6 +583,12 @@ export default function Game() {
 
         setCurrentPosition(newPosition);
         setHistory((prev) => [...prev, newMove]);
+        socket.emit("playerMoved", {
+            currentPosition: newPosition,
+            history: [...history, newMove],
+            gameId: id,
+            userId: profile?.id,
+        });
         setPromotion(null);
     };
 
@@ -578,9 +608,12 @@ export default function Game() {
         >
             <UserIndicator
                 user={
-                    game?.playerWhiteId === profile?.id
-                        ? game?.playerBlack
-                        : game?.playerWhite
+                    game?.playerWhiteId === profile?.id ||
+                    game?.playerBlackId === profile?.id
+                        ? game?.playerWhiteId === profile?.id
+                            ? game?.playerBlack
+                            : game?.playerWhite
+                        : game?.playerBlack
                 }
                 color={
                     game?.playerWhiteId === profile?.id
@@ -717,7 +750,12 @@ export default function Game() {
                         ? Color.white
                         : Color.black
                 }
-                user={profile}
+                user={
+                    game?.playerWhiteId === profile?.id ||
+                    game?.playerBlackId === profile?.id
+                        ? profile
+                        : game?.playerWhite
+                }
                 time="10:00"
             />
 
